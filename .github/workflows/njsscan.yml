@@ -37,6 +37,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+        # run: npm i
 
       - name: NPM Audit
         run: npm audit --json >> npm-audit-output.json
