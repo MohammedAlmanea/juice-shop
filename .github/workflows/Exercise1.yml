@@ -1,13 +1,26 @@
 name: DevSecOps Workflow
 on:
-  push:
-    branches: [master, main]
-  pull_request:
-    branches: [master, main]
+  # push:
+  #   branches: [master, main]
+  # pull_request:
+  #   branches: [master, main]
 jobs:
+  gitleaks:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
+
   njsscan:
     runs-on: ubuntu-latest
     name: njsscan code scanning
+    needs: [gitleaks]
     steps:
 
     - name: Checkout the code
@@ -27,6 +40,7 @@ jobs:
   semgrep:
     runs-on: ubuntu-latest
     name: Semgrep Scan
+    needs: [gitleaks]
     steps:
       - name: Checkout the Code
         uses: actions/checkout@v4.2.1
@@ -96,16 +110,3 @@ jobs:
         with:
           name: retire-output-file
           path: retire-output.json
-
-
-  gitleaks-scan:
-    name: gitleaks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}} # Only required for Organizations, not personal accounts.
